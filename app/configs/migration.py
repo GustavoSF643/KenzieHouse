@@ -5,4 +5,4 @@ def init_app(app: Flask):
     # Aqui vem os import de models
     from app.models.user_model import UserModel
 
-    Migrate(app, app.db)
+    Migrate(app, app.db, compare_type=True)

@@ -3,6 +3,7 @@ from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, String, DateTime
 from werkzeug.security import generate_password_hash, check_password_hash
 from dataclasses import dataclass
+from datetime import datetime
 
 @dataclass
 class UserModel(db.Model, DefaultModel):
@@ -20,10 +21,10 @@ class UserModel(db.Model, DefaultModel):
     email = Column(String(100), nullable=False, unique=True)
     cpf = Column(String(100), nullable=False, unique=True)
     genre = Column(String(15))
-    birthdate = Column(DateTime)
+    birthdate = Column(DateTime, nullable=False)
     cellphone = Column(String(100), nullable=False, unique=True)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow())
+    updated_at = Column(DateTime, default=datetime.utcnow())
     password_hash = Column(String, nullable=False)
 
     @property
@@ -36,3 +37,6 @@ class UserModel(db.Model, DefaultModel):
 
     def validate_password(self, password_to_validate):
         return check_password_hash(self.password_hash, password_to_validate)
+
+    def update(self):
+        self.updated_at = datetime.utcnow()
