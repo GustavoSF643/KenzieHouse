@@ -7,15 +7,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_current_user
 )
-from app.configs.jwt import jwt
 from http import HTTPStatus
-
-@jwt.user_lookup_loader
-def current_user_model(_, jwt_data):
-    user_email = jwt_data['sub']['email']
-    user = UserModel.query.filter_by(email=user_email).first()
-
-    return user
 
 def create_user():
     data_json = request.get_json()

@@ -1,6 +1,7 @@
 from app.configs.database import db
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import backref, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from dataclasses import dataclass
 from datetime import datetime
@@ -26,6 +27,8 @@ class UserModel(db.Model, DefaultModel):
     created_at = Column(DateTime, default=datetime.utcnow())
     updated_at = Column(DateTime, default=datetime.utcnow())
     password_hash = Column(String, nullable=False)
+
+    adresses = relationship('AdressModel', backref='user')
 
     @property
     def password(self):
