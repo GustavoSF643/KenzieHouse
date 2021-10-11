@@ -1,0 +1,6 @@
+
+class InvalidTypeError(Exception):
+    ...
+
+class InvalidKeysError(Exception): 
+    ...
