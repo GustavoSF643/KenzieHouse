@@ -6,9 +6,9 @@ from app.controllers.adress_controller import (
     delete_adress
 )
 
-bp = Blueprint('adresses_bp', __name__)
+bp = Blueprint('adresses_bp', __name__, url_prefix='/adress')
 
-bp.post('/adress')(create_adress)
-bp.get('/adress')(read_adress)
-bp.put('/adress/<int:adress_id>')(update_adress)
-bp.delete('/adress/<int:adress_id>')(delete_adress)
+bp.post('')(create_adress)
+bp.get('')(read_adress)
+bp.put('/<int:adress_id>')(update_adress)
+bp.delete('/<int:adress_id>')(delete_adress)

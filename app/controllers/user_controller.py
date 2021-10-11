@@ -13,6 +13,8 @@ def create_user():
     data_json = request.get_json()
     password_to_hash = data_json.pop('password')
 
+    # TODO -> Tratativa do JSON e Exceções em geral
+
     user = UserModel(**data_json)
     user.password = password_to_hash
 
@@ -25,6 +27,8 @@ def login_user():
     password = request.json.get('password')
 
     user = UserModel.query.filter_by(email=email).first()
+
+    # TODO -> Tratativas de login 
     
     if user.validate_password(password):
         access_token = create_access_token(identity=user)
