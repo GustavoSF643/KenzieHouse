@@ -6,5 +6,6 @@ def init_app(app: Flask):
     from app.models.user_model import UserModel
     from app.models.adresses_model import AdressModel
     from app.models.category_model import CategoryModel
-
+    from app.models.product_model import ProductModel
+    
     Migrate(app, app.db, compare_type=True)
