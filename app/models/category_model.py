@@ -38,6 +38,8 @@ class CategoryModel(db.Model, DefaultModel):
         for key, value in data.items():
             setattr(self, key, value)
 
+        self.save_self()
+
     @staticmethod
     def category_verify(category_name: str):
         category:CategoryModel = CategoryModel.query.filter_by(name=category_name).first()
