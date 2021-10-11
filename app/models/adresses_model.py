@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class AdressModel(db.Model, DefaultModel):
+    adress_id: int
     street: str
     house_number: int
     district: str
