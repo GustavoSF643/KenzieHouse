@@ -2,8 +2,10 @@ import sqlalchemy
 from app.exceptions.payment_exc import InvalidKeysError, InvalidTypeError
 from app.models.payment_method_model import PaymentMethodModel
 from flask import jsonify, request
+from flask_jwt_extended import jwt_required
 
 
+@jwt_required()
 def create_payment():
     try:
         payment_data = request.json
@@ -20,12 +22,14 @@ def create_payment():
         return jsonify(error=str(e)), 406
 
 
+@jwt_required()
 def get_payments():
     payments = PaymentMethodModel.query.all()
 
     return jsonify(payments), 200
 
 
+@jwt_required()
 def get_payment_by_id(id: int):
     payment: PaymentMethodModel = PaymentMethodModel.query.get(id)
 
@@ -35,6 +39,7 @@ def get_payment_by_id(id: int):
     return jsonify(payment), 200
 
 
+@jwt_required()
 def update_payment_by_id(id: int):
     try:
         payment_data = request.json
@@ -51,6 +56,7 @@ def update_payment_by_id(id: int):
         return jsonify(error=str(e)), 406
 
 
+@jwt_required()
 def delete_payment_by_id(id: int):
     payment:PaymentMethodModel = PaymentMethodModel.query.get(id)
     
