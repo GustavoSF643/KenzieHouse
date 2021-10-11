@@ -14,6 +14,7 @@ class OrderModel(db.Model, DefaultModel):
     status = Column(String, nullable=False, default='Aguardando Pagamento')
     created_at = Column(DateTime, default=datetime.utcnow())
 
+    user_id = Column(Integer, ForeignKey('users.user_id'))
     adress_id = Column(Integer, ForeignKey())
     # TODO -> Adiconar ForeignKey ao Criar tabela de orders_adresses
     shipping_company_id = Column(Integer, ForeignKey())

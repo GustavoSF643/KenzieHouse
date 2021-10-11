@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from app.models.adresses_model import AdressModel
+from app.models.adress_model import AdressModel
 from flask_jwt_extended import (
     jwt_required,
     get_current_user
