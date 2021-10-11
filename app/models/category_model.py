@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from app.configs.database import db
-from app.exceptions.category_exc import InvalidKeysError, InvalidTypeError
+from app.exceptions.category_exc import CategoryNotFoundError, InvalidKeysError, InvalidTypeError
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import validates
@@ -20,19 +20,12 @@ class CategoryModel(db.Model, DefaultModel):
     name = Column(String(127), nullable=False, unique=True)
     description = Column(String(255))
 
-    @validates('name')
-    def validate_phone(self, key, name):
-        if type(name) != str:
-            raise InvalidTypeError('Name must be a string type.')
+    @validates('name', 'description')
+    def validate_string_type(self, key, value):
+        if type(value) != str:
+            raise InvalidTypeError(f'{key} must be a string type.')
 
-        return name
-
-    @validates('description')
-    def validate_phone(self, key, name):
-        if type(name) != str:
-            raise InvalidTypeError('Description must be a string type.')
-
-        return name
+        return value
 
 
     def update(self, data):
@@ -44,3 +37,12 @@ class CategoryModel(db.Model, DefaultModel):
 
         for key, value in data.items():
             setattr(self, key, value)
+
+    @staticmethod
+    def category_verify(category_name: str):
+        category:CategoryModel = CategoryModel.query.filter_by(name=category_name).first()
+
+        if not category:
+            raise CategoryNotFoundError('Category not found.')
+
+        return category.category_id
