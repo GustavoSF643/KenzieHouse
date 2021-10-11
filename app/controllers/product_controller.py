@@ -1,11 +1,13 @@
-from flask import request, jsonify
 import sqlalchemy
 from app.exceptions.category_exc import CategoryNotFoundError
 from app.exceptions.product_exc import InvalidKeysError, InvalidTypeError
-
-from app.models.product_model import ProductModel
 from app.models.category_model import CategoryModel
+from app.models.product_model import ProductModel
+from flask import jsonify, request
+from flask_jwt_extended import jwt_required
 
+
+@jwt_required()
 def create_product():
     try:
         product_data = request.json
@@ -41,6 +43,7 @@ def get_product_by_id(id: int):
     return jsonify(product), 200
 
 
+@jwt_required()
 def update_product_by_id(id: int):
     try:
         product_data = request.json
@@ -57,6 +60,7 @@ def update_product_by_id(id: int):
         return jsonify(error=str(e)), 406
 
 
+@jwt_required()
 def delete_product_by_id(id: int):
     product:ProductModel = ProductModel.query.get(id)
     
