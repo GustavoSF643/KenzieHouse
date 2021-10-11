@@ -7,7 +7,7 @@ from app.controllers.category_controller import (
 )
 from flask import Blueprint
 
-bp = Blueprint('categories', __name__, url_prefix='/categories')
+bp = Blueprint('categories_bp', __name__, url_prefix='/categories')
 
 bp.post('')(create_category)
 bp.get('')(get_categories)
