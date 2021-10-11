@@ -7,6 +7,7 @@ def init_app(app: Flask):
     from app.models.adress_model import AdressModel
     from app.models.category_model import CategoryModel
     from app.models.product_model import ProductModel
+    from app.models.order_adress_model import OrderAdressModel
     from app.models.payment_method_model import PaymentMethodModel
     
     Migrate(app, app.db, compare_type=True)

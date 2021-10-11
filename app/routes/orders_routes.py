@@ -10,5 +10,5 @@ bp = Blueprint('orders_bp', __name__, url_prefix='/order')
 
 bp.post('')(create_order)
 bp.get('')(read_order)
-bp.put('/<int:order_id>')(update_order)
+bp.patch('/<int:order_id>')(update_order)
 bp.delete('/<int:order_id>')(delete_order)
