@@ -9,5 +9,6 @@ def init_app(app: Flask):
     from app.models.product_model import ProductModel
     from app.models.order_adress_model import OrderAdressModel
     from app.models.payment_method_model import PaymentMethodModel
+    from app.models.order_product_model import orders_products
     
     Migrate(app, app.db, compare_type=True)
