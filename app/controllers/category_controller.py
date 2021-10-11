@@ -1,6 +1,6 @@
 from flask import request, jsonify
 import sqlalchemy
-from app.exceptions.category_exc import InvalidTypeError
+from app.exceptions.category_exc import InvalidKeysError, InvalidTypeError
 from app.models.category_model import CategoryModel
 
 def create_category():
@@ -35,16 +35,19 @@ def get_category_by_id(id: int):
 
 
 def update_category_by_id(id: int):
-    category_data = request.json
+    try:
+        category_data = request.json
 
-    category:CategoryModel = CategoryModel.query.get(id)
+        category:CategoryModel = CategoryModel.query.get(id)
 
-    if not category:
-        return jsonify(error='Category not found.'), 404
+        if not category:
+            return jsonify(error='Category not found.'), 404
 
-    category.update(category_data)
+        category.update(category_data)
 
-    return jsonify(category), 200
+        return jsonify(category), 200
+    except InvalidKeysError as e:
+        return jsonify(error=str(e)), 406
 
 
 def delete_category_by_id(id: int):
