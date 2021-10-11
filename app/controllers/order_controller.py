@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from app.models.order_model import OrderModel
 from app.models.adress_model import AdressModel
+from app.models.order_adress_model import OrderAdressModel
 from flask_jwt_extended import (
     jwt_required,
     get_current_user
@@ -14,11 +15,15 @@ def create_order():
     adress = jsonify(AdressModel.query.get(adress_id))
     adress.pop('adress_id')
 
-    # TODO -> Usar o dict adress para criar um novo endereço na tabela
-    # order_adresses, depois de criada pegar seu id e adiconar ao data_json
+    # TODO -> Verificação se já existe o endereço cadastrado na tabela
+    # order_adresses
+    order_adress = OrderAdressModel(**adress)
+    order_adress.save_self()
 
     user = get_current_user()
+
     data_json['user_id'] = user.id
+    data_json['adress_id'] = order_adress.id
 
     order = OrderModel(**data_json)
     # user.orders.append(order)

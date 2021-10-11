@@ -10,5 +10,5 @@ bp = Blueprint('adresses_bp', __name__, url_prefix='/adress')
 
 bp.post('')(create_adress)
 bp.get('')(read_adress)
-bp.put('/<int:adress_id>')(update_adress)
+bp.patch('/<int:adress_id>')(update_adress)
 bp.delete('/<int:adress_id>')(delete_adress)
