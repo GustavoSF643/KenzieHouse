@@ -49,7 +49,7 @@ class OrderModel(db.Model, DefaultModel):
 
     def user_order_verify(self, user_id):
         if user_id != self.user.user_id:
-            raise UnauthorizedUserAcess('Order doest pertence to this user.')
+            raise UnauthorizedUserAcess('Order not belongs to this user.')
 
     @staticmethod
     def order_verify(order_id):
