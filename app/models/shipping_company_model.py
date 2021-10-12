@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from app.configs.database import db
-from app.exceptions.shipping_company_exc import InvalidKeysError, InvalidTypeError
+from app.exceptions.shipping_company_exc import InvalidKeysError, InvalidTypeError, ShippingCompanyNotFound
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Float, Integer, String
 from sqlalchemy.orm import validates
@@ -48,3 +48,12 @@ class ShippingCompanyModel(db.Model, DefaultModel):
             setattr(self, key, value)
             
         self.save_self()
+
+    @staticmethod
+    def shipping_company_verify(shipping_company_id):
+        shipping_company: ShippingCompanyModel = ShippingCompanyModel.query.get(shipping_company_id)
+
+        if not shipping_company:
+            raise ShippingCompanyNotFound('Shipping company not found.')
+
+        return shipping_company

@@ -4,5 +4,8 @@ class InvalidTypeError(Exception):
 class InvalidKeysError(Exception):
     ...
 
-class ProductNotFound(Exception):
+class OrderNotFound(Exception):
+    ...
+
+class UnauthorizedUserAcess(Exception):
     ...

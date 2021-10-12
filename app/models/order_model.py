@@ -1,9 +1,10 @@
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from app.configs.database import db
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from dataclasses import dataclass, field
 from datetime import datetime
+from app.exceptions.order_exc import InvalidTypeError, InvalidKeysError, UnauthorizedUserAcess, OrderNotFound
 
 @dataclass
 class OrderModel(db.Model, DefaultModel):
@@ -29,3 +30,32 @@ class OrderModel(db.Model, DefaultModel):
     adress = relationship('OrderAdressModel', backref='orders')
     payment_method = relationship('PaymentMethodModel', backref='orders')
     orders_product = relationship('OrderProductModel', backref='order')
+
+    @validates('status')
+    def validate_string_type(self, key, value):
+        if type(value) is not str:
+            raise InvalidTypeError(f'{key} must be a string type.')
+
+        return value
+
+    def update(self, data):
+        valid_key = ['status']
+
+        if list(data.keys()) != valid_key:
+            raise InvalidKeysError(f"Invalid Keys in body. Accepted Key: {', '.join(valid_key)}")
+
+        self.status = data['status']
+        self.save_self()
+
+    def user_order_verify(self, user_id):
+        if user_id != self.user.user_id:
+            raise UnauthorizedUserAcess('Order doest pertence to this user.')
+
+    @staticmethod
+    def order_verify(order_id):
+        order: OrderModel = OrderModel.query.get(order_id)
+
+        if not order:
+            raise OrderNotFound('Order not found.')
+
+        return order

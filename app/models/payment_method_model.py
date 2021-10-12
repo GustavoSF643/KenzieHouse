@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from app.configs.database import db
-from app.exceptions.payment_exc import InvalidKeysError, InvalidTypeError
+from app.exceptions.payment_exc import InvalidKeysError, InvalidTypeError, PaymentMethodNotFound
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import validates
@@ -39,3 +39,12 @@ class PaymentMethodModel(db.Model, DefaultModel):
             setattr(self, key, value)
             
         self.save_self()
+
+    @staticmethod
+    def payment_method_verify(payment_method_id):
+        payment_method: PaymentMethodModel = PaymentMethodModel.query.get(payment_method_id)
+
+        if not payment_method:
+            raise PaymentMethodNotFound('Payment method not found.')
+
+        return payment_method

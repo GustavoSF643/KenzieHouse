@@ -1,8 +1,8 @@
-from sqlalchemy.orm import relationship
 from app.configs.database import db
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, String, ForeignKey
 from dataclasses import dataclass
+from app.exceptions.adress_exc import AdressNotFound
 
 @dataclass
 class AdressModel(db.Model, DefaultModel):
@@ -24,3 +24,12 @@ class AdressModel(db.Model, DefaultModel):
     cep = Column(String(50), nullable=False)
 
     user_id = Column(Integer, ForeignKey('users.user_id'))
+
+    @staticmethod
+    def adress_verify(adrees_id):
+        adress: AdressModel = AdressModel.query.get(adrees_id)
+
+        if not adress:
+            raise AdressNotFound('Adress not found.')
+
+        return adress

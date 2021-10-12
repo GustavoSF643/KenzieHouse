@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-
 from app.configs.database import db
-from app.exceptions.product_exc import InvalidKeysError, InvalidTypeError
+from app.exceptions.product_exc import InvalidKeysError, InvalidTypeError, ProductNotFound
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, validates
@@ -73,3 +72,12 @@ class ProductModel(db.Model, DefaultModel):
             setattr(self, key, value)
             
         self.save_self()
+
+    @staticmethod
+    def product_verify(product_id):
+        product: ProductModel = ProductModel.query.get(product_id)
+
+        if not product:
+            raise ProductNotFound('Product not found.')
+
+        return product
