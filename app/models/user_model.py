@@ -29,7 +29,7 @@ class UserModel(db.Model, DefaultModel):
     password_hash = Column(String, nullable=False)
 
     adresses = relationship('AdressModel', backref='user')
-    # orders = relationship('OrderModel', backref='user')
+    orders = relationship('OrderModel', backref='user')
 
     @property
     def password(self):
