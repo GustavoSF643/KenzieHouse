@@ -2,7 +2,7 @@ from app.configs.database import db
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, String
 from dataclasses import dataclass
-from app.exceptions.order_exc import InvalidTypeError
+from app.exceptions.adress_exc import InvalidTypeError
 from sqlalchemy.orm import validates
 
 @dataclass

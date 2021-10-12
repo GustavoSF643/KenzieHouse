@@ -5,17 +5,32 @@ from flask_jwt_extended import (
     get_current_user
 )
 from http import HTTPStatus
+from app.exceptions.adress_exc import (
+    AdressNotFound, 
+    InvalidTypeError, 
+    UnauthorizedUserAcess, 
+    InvalidKeysError
+)
 
 @jwt_required()
 def create_adress():
     data_json = request.get_json()
 
     user = get_current_user()
-    adress = AdressModel(**data_json)
-    user.adresses.append(adress)
 
-    adress.save_self()
-    
+    try:
+        AdressModel.validate_keys(data_json, create=True)
+        adress = AdressModel(**data_json)
+        user.adresses.append(adress)
+
+        adress.save_self()
+
+    except InvalidTypeError as e:
+        return jsonify(error=str(e)), HTTPStatus.BAD_REQUEST
+
+    except InvalidKeysError as e:
+        return jsonify(error=str(e)), HTTPStatus.BAD_REQUEST
+
     return jsonify(adress), HTTPStatus.CREATED
 
 
@@ -27,23 +42,40 @@ def read_adress():
 
 @jwt_required()
 def update_adress(adress_id):
-    adress = AdressModel.query.get(adress_id)
-    update_data = request.get_json()
+    user = get_current_user()
 
-    # TODO -> Verificação se o user do token é o 
-    # proprietario do adress sendo atualizado
+    try:
+        adress = AdressModel.adress_verify(adress_id)
+        adress.user_adress_verify(user.user_id)
+        update_data = request.get_json()
 
-    for key, value in update_data.items():
-        setattr(adress, key, value)
+        adress.update(update_data)
+    
+    except AdressNotFound as e:
+        return jsonify(error=str(e)), HTTPStatus.NOT_FOUND
 
-    adress.save_self()
+    except UnauthorizedUserAcess as e:
+        return jsonify(error=str(e)), HTTPStatus.UNAUTHORIZED
+
+    except InvalidKeysError as e:
+        return jsonify(error=str(e)), HTTPStatus.BAD_REQUEST
 
     return jsonify(adress), HTTPStatus.OK
 
 @jwt_required()
 def delete_adress(adress_id):
-    adress = AdressModel.query.get(adress_id)
+    user = get_current_user()
 
-    adress.delete_self()
+    try:
+        adress = AdressModel.adress_verify(adress_id)
+        adress.user_adress_verify(user.user_id)
 
+        adress.delete_self()
+
+    except AdressNotFound as e:
+        return jsonify(error=str(e)), HTTPStatus.NOT_FOUND  
+
+    except UnauthorizedUserAcess as e:
+        return jsonify(error=str(e)), HTTPStatus.UNAUTHORIZED  
+    
     return '', HTTPStatus.NO_CONTENT
