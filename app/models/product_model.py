@@ -4,7 +4,7 @@ from app.configs.database import db
 from app.exceptions.product_exc import InvalidKeysError, InvalidTypeError
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Float, ForeignKey, Integer, String
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import relationship, validates
 
 
 @dataclass
@@ -20,6 +20,7 @@ class ProductModel(db.Model, DefaultModel):
     price: int
     discount_value: int
     stock_quantity: int
+    category: str
 
     __tablename__ = 'products'
 
@@ -35,6 +36,8 @@ class ProductModel(db.Model, DefaultModel):
     price = Column(Integer, nullable=False)
     discount_value = Column(Integer, nullable=False)
     stock_quantity = Column(Integer, nullable=False)
+
+    category = relationship('CategoryModel', backref='products')
 
     @validates('name', 'description', 'weight', 'height', 'length', 'width')
     def validate_string_type(self, key, value):

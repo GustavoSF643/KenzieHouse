@@ -29,7 +29,12 @@ def create_product():
         return jsonify(error=str(e)), 404  
 
 def get_products():
-    products = ProductModel.query.all()
+    name = request.args.get('name')
+     
+    if name:
+        products = ProductModel.query.where(ProductModel.name == name).all()
+    else:
+        products = ProductModel.query.all()
 
     return jsonify(products), 200
 
