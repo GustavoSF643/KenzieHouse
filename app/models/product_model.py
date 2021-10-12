@@ -11,7 +11,7 @@ class ProductModel(db.Model, DefaultModel):
 
     name: str
     description: str
-    rate: str
+    rate: float
     weight: str
     height: str
     length: str

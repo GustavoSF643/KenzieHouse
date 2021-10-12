@@ -32,7 +32,7 @@ def get_products():
     name = request.args.get('name')
      
     if name:
-        products = ProductModel.query.where(ProductModel.name == name).all()
+        products = ProductModel.query.where(sqlalchemy.text(f"products.name ~ '{name}'")).all()
     else:
         products = ProductModel.query.all()
 
