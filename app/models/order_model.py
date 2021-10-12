@@ -15,9 +15,6 @@ class OrderModel(db.Model, DefaultModel):
     created_at = Column(DateTime, default=datetime.utcnow())
 
     user_id = Column(Integer, ForeignKey('users.user_id'))
-    adress_id = Column(Integer, ForeignKey())
-    # TODO -> Adiconar ForeignKey ao Criar tabela de orders_adresses
-    shipping_company_id = Column(Integer, ForeignKey())
-    # TODO -> Adicionar FOreignKey ao criar tabela de shipping_companies
-    payment_method_id = Column(Integer, ForeignKey())
-    # TODO -> Adiconar ForeignKey ao criar tabela de payment_methods
+    adress_id = Column(Integer, ForeignKey('orders_adresses.order_adress_id'))
+    shipping_company_id = Column(Integer, ForeignKey('shipping_companies.shipping_company_id'))
+    payment_method_id = Column(Integer, ForeignKey('payment_methods.payment_method_id'))
