@@ -2,18 +2,21 @@ from flask import request, jsonify
 from app.models.order_model import OrderModel
 from app.models.adress_model import AdressModel
 from app.models.order_adress_model import OrderAdressModel
+from app.models.order_product_model import OrderProductModel
 from flask_jwt_extended import (
     jwt_required,
     get_current_user
 )
 from http import HTTPStatus
+from dataclasses import asdict
 
 @jwt_required()
 def create_order():
-    data_json = request.get_json()
+    data_json = request.json
     adress_id = data_json.pop('adress_id')
-    adress = jsonify(AdressModel.query.get(adress_id))
+    adress = asdict(AdressModel.query.get(adress_id))
     adress.pop('adress_id')
+    print(adress)
 
     # TODO -> Verificação se já existe o endereço cadastrado na tabela
     # order_adresses
@@ -22,14 +25,20 @@ def create_order():
 
     user = get_current_user()
 
-    data_json['user_id'] = user.id
-    data_json['adress_id'] = order_adress.id
+    products = data_json.pop('products')
+
+    data_json['user_id'] = user.user_id
+    data_json['adress_id'] = order_adress.order_adress_id
 
     order = OrderModel(**data_json)
-    # user.orders.append(order)
-
-    # order.save_self()
+    order.save_self()
     
+    for product in products:
+        product['order_id'] = order.order_id
+        order_product = OrderProductModel(**product)
+        order_product.save_self()
+
+
     return jsonify(order), HTTPStatus.CREATED
 
 

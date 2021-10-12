@@ -1,3 +1,4 @@
+from sqlalchemy.orm import relationship
 from app.configs.database import db
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, String, ForeignKey
