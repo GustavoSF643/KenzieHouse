@@ -3,41 +3,64 @@ from app.models.order_model import OrderModel
 from app.models.adress_model import AdressModel
 from app.models.order_adress_model import OrderAdressModel
 from app.models.order_product_model import OrderProductModel
-from flask_jwt_extended import (
-    jwt_required,
-    get_current_user
-)
+from app.models.product_model import ProductModel
+from app.models.shipping_company_model import ShippingCompanyModel
+from app.models.payment_method_model import PaymentMethodModel
+from flask_jwt_extended import jwt_required, get_current_user
 from http import HTTPStatus
 from dataclasses import asdict
+from app.exceptions.order_exc import InvalidTypeError, InvalidKeysError, UnauthorizedUserAcess, OrderNotFound
+from app.exceptions.adress_exc import AdressNotFound
+from app.exceptions.product_exc import ProductNotFound
+from app.exceptions.shipping_company_exc import ShippingCompanyNotFound
+from app.exceptions.payment_exc import PaymentMethodNotFound
 
 @jwt_required()
 def create_order():
     data_json = request.json
+
     adress_id = data_json.pop('adress_id')
-    adress = asdict(AdressModel.query.get(adress_id))
-    adress.pop('adress_id')
-    print(adress)
 
-    # TODO -> Verificação se já existe o endereço cadastrado na tabela
-    # order_adresses
-    order_adress = OrderAdressModel(**adress)
-    order_adress.save_self()
+    try:
+        ShippingCompanyModel.shipping_company_verify(data_json['shipping_company_id'])
+        PaymentMethodModel.payment_method_verify(data_json['payment_method_id'])
 
-    user = get_current_user()
+        adress = asdict(AdressModel.adress_verify(adress_id))
+        adress.pop('adress_id')
 
-    products = data_json.pop('products')
+        order_adress = OrderAdressModel.order_adress_verify(adress)
+        data_json['adress_id'] = order_adress.order_adress_id
 
-    data_json['user_id'] = user.user_id
-    data_json['adress_id'] = order_adress.order_adress_id
+        user = get_current_user()
+        data_json['user_id'] = user.user_id
 
-    order = OrderModel(**data_json)
-    order.save_self()
+        cart_items = data_json.pop('products')
+
+        for item in cart_items:
+            ProductModel.product_verify(item['product_id'])
+
+        order = OrderModel(**data_json)
+        order.save_self()
+        
+        for item in cart_items:
+            item['order_id'] = order.order_id
+            order_product = OrderProductModel(**item)
+            order_product.save_self()
+
+    except AdressNotFound as e:
+        return jsonify(error=str(e)), HTTPStatus.NOT_FOUND
     
-    for product in products:
-        product['order_id'] = order.order_id
-        order_product = OrderProductModel(**product)
-        order_product.save_self()
+    except ProductNotFound as e:
+        return jsonify(error=str(e)), HTTPStatus.NOT_FOUND
+    
+    except ShippingCompanyNotFound as e:
+        return jsonify(error=str(e)), HTTPStatus.NOT_FOUND
 
+    except PaymentMethodNotFound as e:
+        return jsonify(error=str(e)), HTTPStatus.NOT_FOUND
+    
+    except InvalidTypeError as e:
+        return jsonify(error=str(e)), HTTPStatus.BAD_REQUEST
 
     return jsonify(order), HTTPStatus.CREATED
 
@@ -50,28 +73,21 @@ def read_order():
 
 @jwt_required()
 def update_order(order_id):
-    order = OrderModel.query.get(order_id)
-    status = request.json.get('status')
+    user = get_current_user()
 
-    # TODO -> Verificar se somente o status esta sendo
-    # atualizado
+    try:
+        order = OrderModel.order_verify(order_id)
+        order.user_order_verify(user.user_id)
+        order.update(request.json)
 
-    # TODO -> Verificação se o user do token é o 
-    # proprietario da order sendo atualizada
+    except InvalidKeysError as e:
+        return jsonify(error=str(e)), HTTPStatus.BAD_REQUEST
 
-    order.status = status
+    except OrderNotFound as e:
+        return jsonify(error=str(e)), HTTPStatus.NOT_FOUND
 
-    order.save_self()
+    except UnauthorizedUserAcess as e:
+        return jsonify(error=str(e)), HTTPStatus.UNAUTHORIZED
 
     return jsonify(order), HTTPStatus.OK
 
-@jwt_required()
-def delete_order(order_id):
-    # order = OrderModel.query.get(order_id)
-
-    # TODO -> Deleção da order envolve varios cascade
-    # deve-se montar eles no relationship primeiro
-
-    # order.delete_self()
-
-    return '', HTTPStatus.NO_CONTENT

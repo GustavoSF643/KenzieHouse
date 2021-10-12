@@ -49,6 +49,9 @@ class OrderAdressModel(db.Model, DefaultModel):
         ).first()
 
         if not adress:
-            return OrderAdressModel(**data)
+            adress = OrderAdressModel(**data)
+            adress.save_self() 
+
+            return adress
         
         return adress
