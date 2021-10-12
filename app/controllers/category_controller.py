@@ -20,7 +20,12 @@ def create_category():
 
 
 def get_categories():
-    categories = CategoryModel.query.all()
+    name = request.args.get('name')
+
+    if name:
+        categories = CategoryModel.query.where(sqlalchemy.text(f"categories.name ~ '{name}'")).all()
+    else:
+        categories = CategoryModel.query.all()
 
     return jsonify(categories), 200
 
@@ -32,6 +37,12 @@ def get_category_by_id(id: int):
         return jsonify(error='Category not found.'), 404
 
     return jsonify(category), 200
+
+
+def get_products_by_category_id(category_id: int):
+    category_products = CategoryModel.query.get(category_id).products
+
+    return jsonify(category_products), 200
 
 
 def update_category_by_id(id: int):
