@@ -1,8 +1,9 @@
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from app.configs.database import db
 from sqlalchemy import Column, Integer, ForeignKey
 from app.services.helper import DefaultModel
 from dataclasses import field, dataclass
+from app.exceptions.order_exc import InvalidTypeError
 
 @dataclass
 class OrderProductModel(db.Model, DefaultModel):
@@ -18,3 +19,10 @@ class OrderProductModel(db.Model, DefaultModel):
     total_value = Column(Integer, nullable=False)
 
     product = relationship('ProductModel', backref='order_product')
+
+    @validates('quantity', 'total_value')
+    def validate_int_type(self, key, value):
+        if type(value) is not int:
+            raise InvalidTypeError(f'{key} must be a int type.')
+        
+        return value

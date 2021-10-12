@@ -1,9 +1,10 @@
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from app.configs.database import db
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from dataclasses import dataclass, field
 from datetime import datetime
+from app.exceptions.order_exc import InvalidTypeError
 
 @dataclass
 class OrderModel(db.Model, DefaultModel):
@@ -29,3 +30,10 @@ class OrderModel(db.Model, DefaultModel):
     adress = relationship('OrderAdressModel', backref='orders')
     payment_method = relationship('PaymentMethodModel', backref='orders')
     orders_product = relationship('OrderProductModel', backref='order')
+
+    @validates('status')
+    def validate_string_type(self, key, value):
+        if type(value) is not str:
+            raise InvalidTypeError(f'{key} must be a string type.')
+
+        return value
