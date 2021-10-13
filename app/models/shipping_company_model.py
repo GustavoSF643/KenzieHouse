@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-
+import re
 from app.configs.database import db
-from app.exceptions.shipping_company_exc import InvalidKeysError, InvalidTypeError, ShippingCompanyNotFound
+from app.exceptions.shipping_company_exc import InvalidKeysError, InvalidTypeError, ShippingCompanyNotFound, InvalidCnpjFormatError
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Float, Integer, String
 from sqlalchemy.orm import validates
@@ -23,10 +23,23 @@ class ShippingCompanyModel(db.Model, DefaultModel):
     rate = Column(Float)
 
 
-    @validates('name, cnpj')
+    @validates('name')
     def validate_string_type(self, key, value):
         if type(value) != str:
             raise InvalidTypeError(f'{key} must be a string type.')
+
+        return value
+
+    @validates('cnpj')
+    def validate_cnpj_pattern(self, key, value):
+        if type(value) != str:
+            raise InvalidTypeError(f'{key} must be a string type.')
+
+        string = value
+        pattern = '\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}'
+
+        if not re.fullmatch(pattern, string):
+            raise InvalidCnpjFormatError("Invalid cnpj format. Valid format: '00.000.000/0000-00'")
 
         return value
 

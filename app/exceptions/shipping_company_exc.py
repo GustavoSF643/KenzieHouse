@@ -6,3 +6,6 @@ class InvalidKeysError(Exception):
 
 class ShippingCompanyNotFound(Exception):
     ...
+
+class InvalidCnpjFormatError(Exception):
+    ...
