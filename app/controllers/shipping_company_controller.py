@@ -1,11 +1,13 @@
 import sqlalchemy
-from app.exceptions.shipping_company_exc import InvalidKeysError, InvalidTypeError
+from app.exceptions.shipping_company_exc import InvalidKeysError, InvalidTypeError, InvalidCnpjFormatError
 from app.models.shipping_company_model import ShippingCompanyModel
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required
+from app.services.admin_verify import admin_verify
 
 
-# @jwt_required()
+@jwt_required()
+@admin_verify
 def create_shipping_company():
     try:
         shipping_company_data = request.json
@@ -19,16 +21,18 @@ def create_shipping_company():
         return jsonify(error='invalid keys in json-body'), 406
     except sqlalchemy.exc.IntegrityError:
         return jsonify(error='cnpj already exists.'), 409
-    except InvalidTypeError as e:
+    except (InvalidTypeError, InvalidCnpjFormatError) as e:
         return jsonify(error=str(e)), 406  
 
-# @jwt_required()
+@jwt_required()
+@admin_verify
 def get_shipping_company():
     shipping_company = ShippingCompanyModel.query.all()
 
     return jsonify(shipping_company), 200
 
-# @jwt_required()
+@jwt_required()
+@admin_verify
 def get_shipping_company_by_id(id: int):
     shipping_company: ShippingCompanyModel = ShippingCompanyModel.query.get(id)
 
@@ -37,7 +41,8 @@ def get_shipping_company_by_id(id: int):
 
     return jsonify(shipping_company), 200
 
-# @jwt_required()
+@jwt_required()
+@admin_verify
 def update_shipping_company_by_id(id: int):
     try:
         shipping_company_data = request.json
@@ -53,7 +58,8 @@ def update_shipping_company_by_id(id: int):
     except (InvalidKeysError, InvalidTypeError) as e:
         return jsonify(error=str(e)), 406
 
-# @jwt_required()
+@jwt_required()
+@admin_verify
 def delete_shipping_company_by_id(id: int):
     shipping_company:ShippingCompanyModel = ShippingCompanyModel.query.get(id)
     
