@@ -39,6 +39,7 @@ def upload_product_image_by_product_id(product_id: int):
     product.save_product_img(image)
 
     return jsonify(product), 200
+        
 
 
 def get_image_product(product_id, image_name):
