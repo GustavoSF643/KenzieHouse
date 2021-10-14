@@ -1,4 +1,6 @@
 from flask import request, jsonify
+import sqlalchemy
+from app.exceptions.user_exc import InvalidCellphoneFormatError, InvalidCpfFormatError, InvalidKeysError, InvalidTypeError, WrongPasswordError
 from app.models.user_model import UserModel
 from flask_jwt_extended import (
     jwt_required,
@@ -7,41 +9,51 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_current_user
 )
-from app.configs.jwt import jwt
 from http import HTTPStatus
 
-@jwt.user_lookup_loader
-def current_user_model(_, jwt_data):
-    user_email = jwt_data['sub']['email']
-    user = UserModel.query.filter_by(email=user_email).first()
-
-    return user
-
 def create_user():
-    data_json = request.get_json()
-    password_to_hash = data_json.pop('password')
+    try:
+        data_json = request.get_json()
+        password_to_hash = data_json.pop('password')
 
-    user = UserModel(**data_json)
-    user.password = password_to_hash
+        user = UserModel(**data_json)
+        user.password = password_to_hash
 
-    user.save_self()
+        user.save_self()
     
-    return jsonify(user), HTTPStatus.CREATED
+        return jsonify(user), HTTPStatus.CREATED
+    except TypeError:
+        return jsonify(error='invalid keys in json-body'), 406
+    except sqlalchemy.exc.IntegrityError as e:
+        error_str = str(e.orig).split('\n')[1].replace('DETAIL:  Key ', '')
+        return jsonify(error=error_str), 409
+    except (
+        InvalidTypeError, InvalidCellphoneFormatError, InvalidCpfFormatError
+    ) as e:
+        return jsonify(error=str(e)), 406  
 
 def login_user():
-    email = request.json.get('email')
-    password = request.json.get('password')
+    try:
+        email = request.json['email']
+        password = request.json['password']
 
-    user = UserModel.query.filter_by(email=email).first()
-    
-    if user.validate_password(password):
+        user: UserModel = UserModel.query.filter_by(email=email).one()
+
+        user.validate_password(password)
+
         access_token = create_access_token(identity=user)
         refresh_token = create_refresh_token(identity=user)
 
         return jsonify(
             acces_token=access_token, 
             refresh_token=refresh_token
-        ), HTTPStatus.OK
+        ), 200
+    except WrongPasswordError as e:
+        return jsonify(error=str(e)), 403
+    except sqlalchemy.exc.NoResultFound:
+        return {'message': 'User not found'}, 404
+    except KeyError as e:
+        return {'message': 'Keys not acceptable. Valid keys: (email, password).'}, 406
 
 
 @jwt_required()
@@ -50,20 +62,19 @@ def read_user():
 
 @jwt_required()
 def update_user():
-    user = get_current_user()
-    update_data = request.get_json()
+    try:
+        user: UserModel = get_current_user()
+        update_data = request.get_json()
 
-    for key, value in update_data.items():
-        setattr(user, key, value)
+        user.update(update_data)
 
-    user.update()
-    user.save_self()
-
-    return jsonify(user), HTTPStatus.OK
+        return jsonify(user), HTTPStatus.OK
+    except (InvalidKeysError, InvalidTypeError) as e:
+        return jsonify(error=str(e)), 406
 
 @jwt_required()
 def delete_user():
-    user = get_current_user()
+    user: UserModel = get_current_user()
 
     user.delete_self()
 
