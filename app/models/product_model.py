@@ -106,8 +106,10 @@ class ProductModel(db.Model, DefaultModel):
             image_type = '.' + product_image.type.split('/')[1]
             image_filename = product_image.image_filename + image_type
             image_path = safe_join(product_image_folder, image_filename)
-
-            os.remove(image_path)
+            try:
+                os.remove(image_path)
+            except FileNotFoundError:
+                ...
 
         filename = str(secrets.token_urlsafe(16))
         file_type = '.' + image.mimetype.split('/')[1]
