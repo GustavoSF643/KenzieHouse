@@ -1,14 +1,26 @@
+import os
+import secrets
 from dataclasses import dataclass
+
 from app.configs.database import db
-from app.exceptions.product_exc import InvalidKeysError, InvalidTypeError, ProductNotFound
+from app.exceptions.product_exc import (InvalidKeysError, InvalidTypeError,
+                                        ProductNotFound)
+from app.models.product_image_model import ProductImageModel
 from app.services.helper import DefaultModel
+from environs import Env
+from flask import safe_join
 from sqlalchemy import Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, validates
+from werkzeug.datastructures import FileStorage
+
+env = Env()
+env.read_env()
 
 
 @dataclass
 class ProductModel(db.Model, DefaultModel):
 
+    product_id: int
     name: str
     description: str
     rate: float
@@ -19,7 +31,8 @@ class ProductModel(db.Model, DefaultModel):
     price: int
     discount_value: int
     stock_quantity: int
-    category: str
+    category: dict
+    image: dict
 
     __tablename__ = 'products'
 
@@ -37,6 +50,7 @@ class ProductModel(db.Model, DefaultModel):
     stock_quantity = Column(Integer, nullable=False)
 
     category = relationship('CategoryModel', backref='products')
+    image = relationship('ProductImageModel', backref='product', uselist=False)
 
     @validates('name', 'description', 'weight', 'height', 'length', 'width')
     def validate_string_type(self, key, value):
@@ -81,3 +95,38 @@ class ProductModel(db.Model, DefaultModel):
             raise ProductNotFound('Product not found.')
 
         return product
+
+
+    def save_product_img(self, image: FileStorage):
+        if self.image:
+            product_image = ProductImageModel.query.get(self.image.product_image_id)
+            product_image.delete_self()
+            
+            product_image_folder = env('PRODUCT_IMAGE_FOLDER')
+            image_type = '.' + product_image.type.split('/')[1]
+            image_filename = product_image.image_filename + image_type
+            image_path = safe_join(product_image_folder, image_filename)
+
+            os.remove(image_path)
+
+        filename = str(secrets.token_urlsafe(16))
+        file_type = '.' + image.mimetype.split('/')[1]
+        product_image_folder = env('PRODUCT_IMAGE_FOLDER')
+        file_path = safe_join(product_image_folder, filename + file_type)
+
+        image.save(file_path)
+
+        host = env('HOST')
+
+        product_image_dict = {
+            'product_id': self.product_id,
+            'name': image.filename,
+            'link': f"{host}/products/{self.product_id}/{filename}",
+            'type': image.mimetype,
+            'image_filename': filename
+        }
+
+        product_image: ProductImageModel = ProductImageModel(**product_image_dict)
+        product_image.save_self()
+
+        return filename

@@ -6,3 +6,6 @@ class InvalidKeysError(Exception):
 
 class ProductNotFound(Exception):
     ...
+
+class InvalidLinkError(Exception):
+    ...
