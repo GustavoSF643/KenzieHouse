@@ -11,6 +11,7 @@ class ProductModel(db.Model, DefaultModel):
 
     name: str
     description: str
+    img: str
     rate: float
     weight: str
     height: str
@@ -27,6 +28,7 @@ class ProductModel(db.Model, DefaultModel):
     category_id = Column(Integer, ForeignKey('categories.category_id'), nullable=False)
     name = Column(String(127), nullable=False)
     description = Column(String(511))
+    img = Column(String(255))
     rate = Column(Float)
     weight = Column(String(16))
     height = Column(String(16))
