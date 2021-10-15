@@ -1,10 +1,12 @@
 import sqlalchemy
 from app.exceptions.category_exc import CategoryNotFoundError
-from app.exceptions.product_exc import InvalidKeysError, InvalidTypeError
+from app.exceptions.product_exc import InvalidKeysError, InvalidLinkError, InvalidTypeError
 from app.models.category_model import CategoryModel
+from app.models.product_image_model import ProductImageModel
 from app.models.product_model import ProductModel
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required
+from flask_cors import cross_origin
 
 
 @jwt_required()
@@ -27,6 +29,35 @@ def create_product():
         return jsonify(error=str(e)), 406  
     except CategoryNotFoundError as e:
         return jsonify(error=str(e)), 404  
+
+
+@cross_origin()
+def upload_product_image_by_product_id(product_id: int):
+    files = request.files
+    files_name = list(files)
+    image = files[files_name[0]]
+
+    product: ProductModel = ProductModel.query.get(product_id)
+    product.save_product_img(image)
+
+    return jsonify(product), 200
+        
+
+
+def get_image_product(product_id, image_name):
+    try:
+        product: ProductModel = ProductModel.query.get(product_id)
+
+        product_image = product.image
+
+        product_image: ProductImageModel = product_image
+
+        return product_image.download_image(image_name)
+    except AttributeError:
+        return jsonify(error='Image not found'), 404
+    except InvalidLinkError as e:
+        return jsonify(error=str(e)), 400
+
 
 def get_products():
     name = request.args.get('name')
