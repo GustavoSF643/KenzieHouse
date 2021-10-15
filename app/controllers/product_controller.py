@@ -6,6 +6,7 @@ from app.models.product_image_model import ProductImageModel
 from app.models.product_model import ProductModel
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required
+from flask_cors import cross_origin
 
 
 @jwt_required()
@@ -30,6 +31,7 @@ def create_product():
         return jsonify(error=str(e)), 404  
 
 
+@cross_origin()
 def upload_product_image_by_product_id(product_id: int):
     files = request.files
     files_name = list(files)
