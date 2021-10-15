@@ -1,4 +1,6 @@
 import re
+
+from sqlalchemy.sql.sqltypes import Boolean
 from app.configs.database import db
 from app.exceptions.user_exc import InvalidCellphoneFormatError, InvalidCpfFormatError, InvalidKeysError, InvalidTypeError, WrongPasswordError
 from app.services.helper import DefaultModel
@@ -31,6 +33,7 @@ class UserModel(db.Model, DefaultModel):
     created_at = Column(DateTime, default=datetime.utcnow())
     updated_at = Column(DateTime, default=datetime.utcnow())
     password_hash = Column(String, nullable=False)
+    admin = Column(Boolean, nullable=False, default=False)
 
     adresses = relationship('AdressModel', backref='user')
     orders = relationship('OrderModel', backref='user')
