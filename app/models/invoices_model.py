@@ -2,17 +2,10 @@ from app.configs.database import db
 from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, backref
-from dataclasses import dataclass
 from datetime import datetime, timedelta
+from app.exceptions.invoice_exc import ExpiredInvoiceError
 
-@dataclass
 class InvoiceModel(db.Model, DefaultModel):
-    invoice_id: int
-    created_at: datetime
-    due_date: datetime
-    shipping_value: int
-    products_value: int
-    value: int
     __tablename__ = 'invoices'
 
     invoice_id = Column(Integer, primary_key=True)
@@ -24,3 +17,19 @@ class InvoiceModel(db.Model, DefaultModel):
     value = Column(Integer, nullable=False)
 
     order = relationship('OrderModel', backref=backref('invoice', uselist=False))
+
+    def format_self(self):
+        return {
+            'invoice_id': self.invoice_id,
+            'created_at': datetime.strftime(self.created_at, '%d/%m/%Y %H:%M:%S %p'),
+            'due_date': datetime.strftime(self.due_date, '%d/%m/%Y %H:%M:%S %p'),
+            'shipping_value': self.shipping_value,
+            'products_value': self.products_value,
+            'value': self.value
+        }
+
+    def verify_invoice_due_date(self):
+        today = datetime.utcnow()
+
+        if today > self.due_date:
+            raise ExpiredInvoiceError('Cannot pay a invoice with expired due date.')
