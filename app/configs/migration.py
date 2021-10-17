@@ -12,5 +12,6 @@ def init_app(app: Flask):
     from app.models.order_model import OrderModel
     from app.models.order_product_model import OrderProductModel
     from app.models.product_image_model import ProductImageModel
+    from app.models.invoices_model import InvoiceModel
     
     Migrate(app, app.db, compare_type=True)

@@ -21,6 +21,7 @@ class ShippingCompanyModel(db.Model, DefaultModel):
     name = Column(String(127), nullable=False)
     cnpj = Column(String(100), nullable=False, unique=True)
     rate = Column(Float)
+    minimum_shipping_price = Column(Integer, default=0)
 
 
     @validates('name')
