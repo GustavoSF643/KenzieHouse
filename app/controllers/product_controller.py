@@ -1,13 +1,17 @@
 import sqlalchemy
 from app.exceptions.category_exc import CategoryNotFoundError
-from app.exceptions.product_exc import InvalidKeysError, InvalidLinkError, InvalidTypeError
+from app.exceptions.product_exc import (InvalidKeysError, InvalidLinkError,
+                                        InvalidTypeError)
 from app.models.category_model import CategoryModel
 from app.models.product_image_model import ProductImageModel
 from app.models.product_model import ProductModel
+from environs import Env
 from flask import jsonify, request
-from flask_jwt_extended import jwt_required
 from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required
 
+env = Env()
+env.read_env()
 
 @jwt_required()
 def create_product():
@@ -61,13 +65,27 @@ def get_image_product(product_id, image_name):
 
 def get_products():
     name = request.args.get('name')
-     
+
     if name:
         products = ProductModel.query.where(sqlalchemy.text(f"products.name ~ '{name}'")).all()
     else:
         products = ProductModel.query.all()
 
-    return jsonify(products), 200
+    return_products = []
+    for product in products:
+        host = env('HOST')
+
+        formated_product = {
+            "product_id": product.product_id,
+            "name": product.name,
+            "description": product.description,
+            "category": product.category.name,
+            "image": product.image,
+            "product_info": f"{host}/products/{product.product_id}"
+        }
+        return_products.append(formated_product)
+
+    return jsonify(return_products), 200
 
 
 def get_product_by_id(id: int):
