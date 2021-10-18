@@ -35,6 +35,7 @@ def create_product():
 
 
 @cross_origin()
+@jwt_required()
 def upload_product_image_by_product_id(product_id: int):
     files = request.files
     files_name = list(files)
