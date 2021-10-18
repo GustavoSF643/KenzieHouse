@@ -27,14 +27,12 @@ def create_shipping_company():
 
 
 @jwt_required()
-@admin_verify
 def get_shipping_company():
     shipping_company = ShippingCompanyModel.query.all()
 
     return jsonify(shipping_company), 200
 
 @jwt_required()
-@admin_verify
 def get_shipping_company_by_id(id: int):
     shipping_company: ShippingCompanyModel = ShippingCompanyModel.query.get(id)
 
