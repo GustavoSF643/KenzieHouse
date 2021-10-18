@@ -1,7 +1,13 @@
-from flask import request, jsonify
+from dataclasses import asdict
+
 import sqlalchemy
 from app.exceptions.category_exc import InvalidKeysError, InvalidTypeError
 from app.models.category_model import CategoryModel
+from environs import Env
+from flask import jsonify, request
+
+env = Env()
+env.read_env()
 
 def create_category():
     try:
@@ -27,7 +33,16 @@ def get_categories():
     else:
         categories = CategoryModel.query.all()
 
-    return jsonify(categories), 200
+    output_categories = []
+    for category in categories:
+        category_dict = asdict(category)
+
+        host = env('HOST')
+        category_dict['products'] = f"{host}/categories/{category_dict['category_id']}/products"
+        
+        output_categories.append(category_dict)
+
+    return jsonify(output_categories), 200
 
 
 def get_category_by_id(id: int):
