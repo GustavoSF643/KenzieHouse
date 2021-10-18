@@ -11,7 +11,7 @@ from flask_jwt_extended.view_decorators import jwt_required
 env = Env()
 env.read_env()
 
-@jwt_required
+@jwt_required()
 @admin_verify
 def create_category():
     try:
@@ -64,7 +64,7 @@ def get_products_by_category_id(category_id: int):
     return jsonify(category_products), 200
 
 
-@jwt_required
+@jwt_required()
 @admin_verify
 def update_category_by_id(id: int):
     try:
@@ -82,7 +82,7 @@ def update_category_by_id(id: int):
         return jsonify(error=str(e)), 406
 
 
-@jwt_required
+@jwt_required()
 @admin_verify
 def delete_category_by_id(id: int):
     category:CategoryModel = CategoryModel.query.get(id)
