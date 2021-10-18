@@ -72,7 +72,7 @@ def update_category_by_id(id: int):
         category.update(category_data)
 
         return jsonify(category), 200
-    except InvalidKeysError as e:
+    except (InvalidKeysError, InvalidTypeError) as e:
         return jsonify(error=str(e)), 406
 
 
