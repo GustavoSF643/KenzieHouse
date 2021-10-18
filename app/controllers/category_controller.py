@@ -3,12 +3,16 @@ from dataclasses import asdict
 import sqlalchemy
 from app.exceptions.category_exc import InvalidKeysError, InvalidTypeError
 from app.models.category_model import CategoryModel
+from app.services.admin_verify import admin_verify
 from environs import Env
 from flask import jsonify, request
+from flask_jwt_extended.view_decorators import jwt_required
 
 env = Env()
 env.read_env()
 
+@jwt_required
+@admin_verify
 def create_category():
     try:
         category_data = request.json
@@ -60,6 +64,8 @@ def get_products_by_category_id(category_id: int):
     return jsonify(category_products), 200
 
 
+@jwt_required
+@admin_verify
 def update_category_by_id(id: int):
     try:
         category_data = request.json
@@ -76,6 +82,8 @@ def update_category_by_id(id: int):
         return jsonify(error=str(e)), 406
 
 
+@jwt_required
+@admin_verify
 def delete_category_by_id(id: int):
     category:CategoryModel = CategoryModel.query.get(id)
     
