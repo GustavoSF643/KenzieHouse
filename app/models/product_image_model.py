@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 
 from app.configs.database import db
-from app.exceptions.product_exc import InvalidLinkError
+from app.exceptions.product_exc import InvalidLinkError, ImageNotFoundError
 from app.services.helper import DefaultModel
 from environs import Env
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.schema import ForeignKey
 from flask import send_from_directory
+import os
 
 env = Env()
 env.read_env()
@@ -29,10 +30,16 @@ class ProductImageModel(db.Model, DefaultModel):
     image_filename = Column(String(255), nullable=False)
 
     def download_image(self, image_name):
+        image_type = '.' + self.type.split('/')[1]
+
         if self.image_filename != image_name:
             raise InvalidLinkError('Invalid link.')
+        
+        for _, _, filenames in os.walk(f"./{env('PRODUCT_IMAGE_FOLDER')}"):
+            image_filename = image_name + image_type
+            if image_filename not in filenames:
+                raise ImageNotFoundError('Image not found.')
 
-        image_type = '.' + self.type.split('/')[1]
         
         product_image_folder = env('PRODUCT_IMAGE_FOLDER')
         file_path = self.image_filename + image_type

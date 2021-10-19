@@ -1,6 +1,6 @@
 import sqlalchemy
 from app.exceptions.category_exc import CategoryNotFoundError
-from app.exceptions.product_exc import (InvalidKeysError, InvalidLinkError,
+from app.exceptions.product_exc import (ImageNotFoundError, InvalidKeysError, InvalidLinkError,
                                         InvalidTypeError)
 from app.models.category_model import CategoryModel
 from app.models.product_image_model import ProductImageModel
@@ -51,7 +51,6 @@ def upload_product_image_by_product_id(product_id: int):
     return jsonify(product), 200
         
 
-
 def get_image_product(product_id, image_name):
     try:
         product: ProductModel = ProductModel.query.get(product_id)
@@ -65,7 +64,8 @@ def get_image_product(product_id, image_name):
         return jsonify(error='Image not found'), 404
     except InvalidLinkError as e:
         return jsonify(error=str(e)), 400
-
+    except ImageNotFoundError as e:
+        return jsonify(error=str(e)), 404
 
 def get_products():
     name = request.args.get('name')
