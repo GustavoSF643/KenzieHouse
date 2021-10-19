@@ -9,3 +9,6 @@ class ProductNotFound(Exception):
 
 class InvalidLinkError(Exception):
     ...
+
+class ImageNotFoundError(Exception):
+    ...
