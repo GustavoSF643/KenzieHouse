@@ -14,7 +14,7 @@ if not os.path.exists(f"./{env('PRODUCT_IMAGE_FOLDER')}"):
 def create_app():
 
     app = Flask(__name__)
-    CORS(app, origins=['http://localhost:3000'])
+    CORS(app, origins=[env('FRONTEND_APP')])
 
     environment.init_app(app)
     jwt.init_app(app)
