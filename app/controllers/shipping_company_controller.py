@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required
 from app.services.admin_verify import admin_verify
 
 
+
 @jwt_required()
 @admin_verify
 def create_shipping_company():
@@ -24,15 +25,14 @@ def create_shipping_company():
     except (InvalidTypeError, InvalidCnpjFormatError) as e:
         return jsonify(error=str(e)), 406  
 
+
 @jwt_required()
-@admin_verify
 def get_shipping_company():
     shipping_company = ShippingCompanyModel.query.all()
 
     return jsonify(shipping_company), 200
 
 @jwt_required()
-@admin_verify
 def get_shipping_company_by_id(id: int):
     shipping_company: ShippingCompanyModel = ShippingCompanyModel.query.get(id)
 

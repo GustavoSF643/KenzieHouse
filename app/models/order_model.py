@@ -4,7 +4,7 @@ from app.services.helper import DefaultModel
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from dataclasses import dataclass, field
 from datetime import datetime
-from app.exceptions.order_exc import InvalidTypeError, InvalidKeysError, UnauthorizedUserAcess, OrderNotFound
+from app.exceptions.order_exc import InvalidTypeError, UnauthorizedUserAcess, OrderNotFound
 
 @dataclass
 class OrderModel(db.Model, DefaultModel):
@@ -38,15 +38,6 @@ class OrderModel(db.Model, DefaultModel):
 
         return value
 
-    def update(self, data):
-        valid_key = ['status']
-
-        if list(data.keys()) != valid_key:
-            raise InvalidKeysError(f"Invalid Keys in body. Accepted Key: {', '.join(valid_key)}")
-
-        self.status = data['status']
-        self.save_self()
-
     def user_order_verify(self, user_id):
         if user_id != self.user.user_id:
             raise UnauthorizedUserAcess('Order not belongs to this user.')
@@ -59,3 +50,9 @@ class OrderModel(db.Model, DefaultModel):
             raise OrderNotFound('Order not found.')
 
         return order
+
+    def payment_confirm(self):
+        self.status = 'Pagamento Confirmado'
+
+    def cancel_order(self):
+        self.status = 'Pedido Cancelado'

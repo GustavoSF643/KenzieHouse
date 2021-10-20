@@ -1,9 +1,6 @@
 class InvalidTypeError(Exception):
     ...
 
-class InvalidKeysError(Exception):
-    ...
-
 class OrderNotFound(Exception):
     ...
 

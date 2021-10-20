@@ -1,15 +1,21 @@
 import sqlalchemy
 from app.exceptions.category_exc import CategoryNotFoundError
-from app.exceptions.product_exc import InvalidKeysError, InvalidLinkError, InvalidTypeError
+from app.exceptions.product_exc import (ImageNotFoundError, InvalidKeysError, InvalidLinkError,
+                                        InvalidTypeError)
 from app.models.category_model import CategoryModel
 from app.models.product_image_model import ProductImageModel
 from app.models.product_model import ProductModel
+from app.services.admin_verify import admin_verify
+from environs import Env
 from flask import jsonify, request
-from flask_jwt_extended import jwt_required
 from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required
 
+env = Env()
+env.read_env()
 
 @jwt_required()
+@admin_verify
 def create_product():
     try:
         product_data = request.json
@@ -32,6 +38,8 @@ def create_product():
 
 
 @cross_origin()
+@jwt_required()
+@admin_verify
 def upload_product_image_by_product_id(product_id: int):
     files = request.files
     files_name = list(files)
@@ -42,7 +50,6 @@ def upload_product_image_by_product_id(product_id: int):
 
     return jsonify(product), 200
         
-
 
 def get_image_product(product_id, image_name):
     try:
@@ -57,17 +64,33 @@ def get_image_product(product_id, image_name):
         return jsonify(error='Image not found'), 404
     except InvalidLinkError as e:
         return jsonify(error=str(e)), 400
-
+    except ImageNotFoundError as e:
+        return jsonify(error=str(e)), 404
 
 def get_products():
     name = request.args.get('name')
-     
+
     if name:
         products = ProductModel.query.where(sqlalchemy.text(f"products.name ~ '{name}'")).all()
     else:
         products = ProductModel.query.all()
 
-    return jsonify(products), 200
+    return_products = []
+    for product in products:
+        host = env('HOST')
+
+        formated_product = {
+            "product_id": product.product_id,
+            "name": product.name,
+            "description": product.description,
+            "category": product.category.name,
+            "price": product.price,
+            "image": product.image,
+            "product_link": f"{host}/products/{product.product_id}"
+        }
+        return_products.append(formated_product)
+        
+    return jsonify(return_products), 200
 
 
 def get_product_by_id(id: int):
@@ -80,6 +103,7 @@ def get_product_by_id(id: int):
 
 
 @jwt_required()
+@admin_verify
 def update_product_by_id(id: int):
     try:
         product_data = request.json
@@ -97,6 +121,7 @@ def update_product_by_id(id: int):
 
 
 @jwt_required()
+@admin_verify
 def delete_product_by_id(id: int):
     product:ProductModel = ProductModel.query.get(id)
     
