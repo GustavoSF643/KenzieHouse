@@ -84,6 +84,7 @@ def get_products():
             "name": product.name,
             "description": product.description,
             "category": product.category.name,
+            "price": product.price,
             "image": product.image,
             "product_link": f"{host}/products/{product.product_id}"
         }
