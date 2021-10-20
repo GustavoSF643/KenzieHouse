@@ -4,12 +4,9 @@ import sqlalchemy
 from app.exceptions.category_exc import InvalidKeysError, InvalidTypeError
 from app.models.category_model import CategoryModel
 from app.services.admin_verify import admin_verify
-from environs import Env
 from flask import jsonify, request
 from flask_jwt_extended.view_decorators import jwt_required
 
-env = Env()
-env.read_env()
 
 @jwt_required()
 @admin_verify
@@ -41,8 +38,7 @@ def get_categories():
     for category in categories:
         category_dict = asdict(category)
 
-        host = env('HOST')
-        category_dict['products'] = f"{host}/categories/{category_dict['category_id']}/products"
+        category_dict['products'] = f"/categories/{category_dict['category_id']}/products"
         
         output_categories.append(category_dict)
 
