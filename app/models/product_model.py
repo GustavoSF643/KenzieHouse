@@ -123,7 +123,7 @@ class ProductModel(db.Model, DefaultModel):
         product_image_dict = {
             'product_id': self.product_id,
             'name': image.filename,
-            'link': f"{host}/products/{self.product_id}/{filename}",
+            'link': f"{host}/{filename}",
             'type': image.mimetype,
             'image_filename': filename
         }
