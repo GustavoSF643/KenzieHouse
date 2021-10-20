@@ -48,7 +48,7 @@ def login_user():
         refresh_token = create_refresh_token(identity=user)
 
         return jsonify(
-            acces_token=access_token, 
+            access_token=access_token, 
             refresh_token=refresh_token
         ), 200
     except WrongPasswordError as e:
