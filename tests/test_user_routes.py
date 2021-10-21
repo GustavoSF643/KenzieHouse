@@ -44,7 +44,7 @@ def test_if_LOGIN_request_in_users_route_return_status_code_CREATED():
         content_type='application/json',
     )
     response_data = json.loads(response.get_data())
-    pytest_namespace.authorization_token = response_data['acces_token']
+    pytest_namespace.authorization_token = response_data['access_token']
 
     assert response.status_code == 200, "Incorrect status."
 

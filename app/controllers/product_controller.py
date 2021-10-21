@@ -6,13 +6,10 @@ from app.models.category_model import CategoryModel
 from app.models.product_image_model import ProductImageModel
 from app.models.product_model import ProductModel
 from app.services.admin_verify import admin_verify
-from environs import Env
 from flask import jsonify, request
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
 
-env = Env()
-env.read_env()
 
 @jwt_required()
 @admin_verify
@@ -77,7 +74,6 @@ def get_products():
 
     return_products = []
     for product in products:
-        host = env('HOST')
 
         formated_product = {
             "product_id": product.product_id,
@@ -86,7 +82,7 @@ def get_products():
             "category": product.category.name,
             "price": product.price,
             "image": product.image,
-            "product_link": f"{host}/products/{product.product_id}"
+            "product_link": f"/products/{product.product_id}"
         }
         return_products.append(formated_product)
         

@@ -118,12 +118,10 @@ class ProductModel(db.Model, DefaultModel):
 
         image.save(file_path)
 
-        host = env('HOST')
-
         product_image_dict = {
             'product_id': self.product_id,
             'name': image.filename,
-            'link': f"{host}/{filename}",
+            'link': f"/products/{self.product_id}/{filename}",
             'type': image.mimetype,
             'image_filename': filename
         }
